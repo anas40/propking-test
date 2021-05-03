@@ -41,11 +41,16 @@ app.post('/', async (req, res) => {
 });
 app.patch('/', async (req, res) => {
     try {
-        const land = new Land({
-
-        })
-        await land.save();
-        res.send(land.toJSON({ virtual: true }))
+        const { id,field,update } = req.body
+        if (!id) { throw new Error("id missing from body") }
+        if (!field) { throw new Error("field missing from body") }
+        if (!update) { throw new Error("update value missing from body") }
+        const options = {}
+        options[field] =update
+        const updatedLand = await Land.findByIdAndUpdate(id, options, { new: true });
+        const load = JSON.stringify(updatedLand)
+        console.log(load);
+        res.send(load)
     }
     catch (error) {
         console.log("E : ", error.message);
