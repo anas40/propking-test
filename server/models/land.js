@@ -1,11 +1,6 @@
 const mongoose = require('mongoose')
 
 const landSchema = new mongoose.Schema({
-    id: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        
-    },
     name: {
         type: String,
         unique: true,
@@ -18,7 +13,7 @@ const landSchema = new mongoose.Schema({
     },
     city: {
         type: String,
-        trim:true,
+        trim: true,
         required: [true, 'City is required']
     },
     state: {
@@ -31,7 +26,12 @@ const landSchema = new mongoose.Schema({
         trim: true,
         required: [true, 'Country is required']
     }
+}, {
+    toJSON: { virtuals: true }
 })
+landSchema.virtual('id').get(function () {
+    return this._id;
+});
 
 const Land = mongoose.model('Land', landSchema)
 
