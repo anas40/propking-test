@@ -5,8 +5,9 @@ import Cookies from 'universal-cookie'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 
 //components and pages
-import Home from "./Home"
-import Login from './Login.js'
+import Home from "./home.js"
+import Login from './login.js'
+import NotFound from './notfound.js'
 
 import { login as ll } from '../store/atoms'
 
@@ -20,7 +21,7 @@ function Routes() {
         <div>
             <Router>
                 <Switch>
-                    <Route path='/login' component={Login} />
+                    <Route path="/login" exact component={Login} />
                     <Route path="/" exact component={Home} />
                     <Route component={NotFound} />
                 </Switch>

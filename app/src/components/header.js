@@ -4,7 +4,7 @@ import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil'
 
 import { login as ll } from '../store/atoms'
 
-import '../../assets/css/header.css'
+import '../assets/css/header.css'
 
 function Header() {
     const [isLogin] = useRecoilState(ll)
