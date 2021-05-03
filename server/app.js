@@ -1,12 +1,83 @@
 const express = require('express');
 const app = express();
+require('dotenv').config();
+
+const cookieParser = require('cookie-parser');
+const argon2 = require('argon2');
+const jwt = require('jsonwebtoken')
 
 require('./db/start')
-app.use(express.json())
+
 
 const Land = require('./models/land')
+const User = require('./models/user')
 
-// route
+app.use(express.json())
+
+app.use(cookieParser());
+
+app.get('/signout', async (req, res) => {
+    try {
+        res.clearCookie('jwt');
+        res.send("Successfully signed out");
+    }
+    catch (error) {
+        console.log("E : ", error.message);
+        res.status(400).send("Unable to signout")
+    }
+});
+
+app.post('/signin', async (req, res) => {
+    try {
+        if (!req.body) {
+            throw new Error('no body');
+        }
+        const { email,password } = req.body
+        if (!email) { throw new Error("Email missing from body") }
+        if (!password) { throw new Error("Password missing from body") }
+
+        const user = await User.findOne({email});
+        if (user === null) { throw new Error('User already Exist') }
+        if (await argon2.verify(user.password, password)) {
+            const signedToken = jwt.sign(email, process.env.JWT_SECRET_KEY)
+            res.cookie('jwt', signedToken);
+            return res.send({message:"success",token:signedToken});
+        } else {
+            throw new Error('Password does not match');
+        }
+    }
+    catch (error) {
+        console.log("E : ", error.message);
+        res.status(400).send("Failed to signin")
+    }
+});
+
+app.post('/signup', async (req, res) => {
+    try {
+        if (!req.body) {
+            throw new Error('no body');
+        }
+        const { email, password } = req.body
+        if (!email) { throw new Error("Email missing from body") }
+        if (!password) { throw new Error("Password missing from body") }
+
+        const user = await User.findOne({ email });
+        if (user !== null) {
+            throw new Error('User already Exist')
+        }
+        const hash = await argon2.hash(password);
+        let newUser = new User({ email, password: hash });
+        newUser.save()
+        res.status(200).send("Signed up Successfully")            
+    }
+    catch (error) {
+        console.log("E : ", error.message);
+        res.status(400).send("Failed to signup")
+    }
+});
+
+
+// CRUD routes
 app.get('/', async (req, res) => {
     try {
         const allLand = await Land.find({});
@@ -57,6 +128,7 @@ app.patch('/', async (req, res) => {
         res.status(400).send("Unable to update")
     }
 });
+
 app.delete('/', async (req, res) => {
     try {
         const { id } = req.body
