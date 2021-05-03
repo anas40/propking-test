@@ -5,12 +5,17 @@ require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken')
+const cors = require('cors');
 
 require('./db/start')
 
 const Land = require('./models/land')
 const User = require('./models/user')
 
+app.use(cors({
+    credentials: true,
+    origin: "*"
+}));
 app.use(express.json())
 app.use(cookieParser());
 
