@@ -8,15 +8,35 @@ const jwt = require('jsonwebtoken')
 
 require('./db/start')
 
-
 const Land = require('./models/land')
 const User = require('./models/user')
 
 app.use(express.json())
-
 app.use(cookieParser());
 
-app.get('/signout', async (req, res) => {
+function secure(req, res, next) {
+    try {
+
+        if (!req.cookies || !req.cookies.jwt) {
+            throw new Error();
+        }
+
+        const token = req.cookies.jwt;
+
+        jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+            if (err) {
+                throw new Error();
+            }
+            req.email = decoded;
+            next();
+        });
+    } catch (error) {
+        console.log('Token mismatch');
+        res.status(403).send("Not authorized");
+    }
+}
+
+app.get('/signout',secure, async (req, res) => {
     try {
         res.clearCookie('jwt');
         res.send("Successfully signed out");
@@ -41,7 +61,7 @@ app.post('/signin', async (req, res) => {
         if (await argon2.verify(user.password, password)) {
             const signedToken = jwt.sign(email, process.env.JWT_SECRET_KEY)
             res.cookie('jwt', signedToken);
-            return res.send({message:"success",token:signedToken});
+            res.send({message:"success",token:signedToken});
         } else {
             throw new Error('Password does not match');
         }
@@ -90,7 +110,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.post('/', async (req, res) => {
+app.post('/',secure, async (req, res) => {
     try {
         const { name, area, city, state, country } = req.body
         if(!name){throw new Error("Name missing from body")}
@@ -110,7 +130,8 @@ app.post('/', async (req, res) => {
         res.status(400).send("Failed to save Land")
     }
 });
-app.patch('/', async (req, res) => {
+
+app.patch('/',secure, async (req, res) => {
     try {
         const { id,field,update } = req.body
         if (!id) { throw new Error("id missing from body") }
@@ -129,7 +150,7 @@ app.patch('/', async (req, res) => {
     }
 });
 
-app.delete('/', async (req, res) => {
+app.delete('/',secure, async (req, res) => {
     try {
         const { id } = req.body
         if (!id) { throw new Error("id missing from body") }
