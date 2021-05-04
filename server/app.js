@@ -14,34 +14,34 @@ const User = require('./models/user')
 
 app.use(cors({
     credentials: true,
-    origin: "*"
+    origin: "http://localhost:3001"
 }));
 app.use(express.json())
 app.use(cookieParser());
 
 function secure(req, res, next) {
     try {
-
+        console.log(req.cookies);
         if (!req.cookies || !req.cookies.jwt) {
-            throw new Error();
+            throw new Error("No cookies");
         }
 
         const token = req.cookies.jwt;
 
         jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
             if (err) {
-                throw new Error();
+                throw new Error("mismatch");
             }
             req.email = decoded;
             next();
         });
     } catch (error) {
-        console.log('Token mismatch');
+        console.log(error.message);
         res.status(403).send("Not authorized");
     }
 }
 
-app.get('/signout',secure, async (req, res) => {
+app.get('/signout', async (req, res) => {
     try {
         res.clearCookie('jwt');
         res.send("Successfully signed out");
@@ -72,7 +72,7 @@ app.post('/signin', async (req, res) => {
         }
     }
     catch (error) {
-        console.log("E : ", error.message);
+        console.log("E : ", error);
         res.status(400).send("Failed to signin")
     }
 });
@@ -92,8 +92,9 @@ app.post('/signup', async (req, res) => {
         }
         const hash = await argon2.hash(password);
         let newUser = new User({ email, password: hash });
-        newUser.save()
-        res.status(200).send("Signed up Successfully")            
+        await newUser.save()
+        const signedToken = jwt.sign(email, process.env.JWT_SECRET_KEY)
+        res.status(200).send({ message: "success", token: signedToken })
     }
     catch (error) {
         console.log("E : ", error.message);
@@ -151,7 +152,7 @@ app.patch('/',secure, async (req, res) => {
     }
     catch (error) {
         console.log("E : ", error.message);
-        res.status(400).send("Unable to update")
+        res.status(400).send(error.message)
     }
 });
 
