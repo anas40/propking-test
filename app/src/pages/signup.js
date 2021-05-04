@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import Axios from '../store/interceptor'
 import Cookies from 'universal-cookie'
 import { useHistory } from 'react-router-dom';
-import { login as ll,promptLogin as pL } from '../store/atoms'
+import { login as ll, promptLogin as pL } from '../store/atoms'
+
 import { Link } from 'react-router-dom';
-
-
 import '../assets/css/login.css'
 import { useSetRecoilState,useRecoilState } from 'recoil';
 const cookies = new Cookies();
 
-function Login() {
+function Signup() {
     const setLogin = useSetRecoilState(ll)
-    const [promptLogin,setPromptLogin] = useRecoilState(pL)
+    const [promptLogin, setPromptLogin] = useRecoilState(pL)
+
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -20,7 +20,7 @@ function Login() {
 
     function login(event) {
         event.preventDefault()
-        Axios.post('signin', { email, password }).then((data) => {
+        Axios.post('signup', { email, password }).then((data) => {
             cookies.set('jwt', data.data.token);
             setLogin(true)
             setPromptLogin(false)
@@ -29,26 +29,24 @@ function Login() {
             console.log(error)
         })
     }
- 
+
     return (
         <div className="loginContainer">
             <form onSubmit={login} className="login-form">
-                <h1>Login</h1>
-                {promptLogin && <p className="error">Changing name requires login</p>}
+                <h1>Signup</h1>
                 <div className="form-input-material">
-                    <input onChange={event=> setEmail(event.target.value)} value={email} type="text" name="email" id="username" placeholder=" " required className="form-control-material" />
+                    <input onChange={event => setEmail(event.target.value)} value={email} type="text" name="email" id="username" placeholder=" " required className="form-control-material" />
                     <label htmlFor="email">Email</label>
                 </div>
                 <div className="form-input-material">
                     <input type="password" onChange={event => setPassword(event.target.value)} name="password" value={password} id="password" placeholder=" " required className="form-control-material" />
                     <label htmlFor="password">Password</label>
                 </div>
-                <button type="submit" className="btn btn-ghost">Login</button>
-                <Link to="/signup">Signup</Link>
-
+                <button type="submit" className="btn btn-ghost">Signup</button>
+                <Link to="/login">Login</Link>
             </form>
         </div>
     )
 }
 
-export default Login;
+export default Signup;
