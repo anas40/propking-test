@@ -26,6 +26,7 @@ function Login() {
             setPromptLogin(false)
             history.push('/')
         }).catch(error => {
+            setPromptLogin(error.message)
             console.log(error)
         })
     }
