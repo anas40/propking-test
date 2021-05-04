@@ -1,0 +1,18 @@
+footer{
+    min-height: 60px;
+    background-color: #393e46;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+footer div{
+    color: white;
+}
+footer a {
+    color: white;
+    text-decoration: none;
+}
+footer a:hover{
+    color:white;
+    text-decoration:underline;
+}
