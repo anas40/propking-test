@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Roboto;
+}
+main{
+    background-color: #eeeeee;
+    min-height: calc(100vh - 120px);
+}
+#box{
+    padding: 2rem .5rem;
+    background-repeat: repeat;
+    background-size: 10vw 10vw;
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
