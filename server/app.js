@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-require('dotenv').config();
+// require('dotenv').config();
 
 const cookieParser = require('cookie-parser');
 const argon2 = require('argon2');
@@ -14,14 +14,14 @@ const User = require('./models/user')
 
 app.use(cors({
     credentials: true,
-    origin: "http://localhost:3001"
+    origin: "https://prop-anas.onrender.com"
 }));
 app.use(express.json())
 app.use(cookieParser());
 
+
 function secure(req, res, next) {
     try {
-        console.log(req.cookies);
         if (!req.cookies || !req.cookies.jwt) {
             throw new Error("No cookies");
         }
@@ -43,7 +43,7 @@ function secure(req, res, next) {
 
 app.get('/signout', async (req, res) => {
     try {
-        res.clearCookie('jwt');
+        res.clearCookie('jwt', { sameSite: 'none', secure: 'true' });
         res.send("Successfully signed out");
     }
     catch (error) {
@@ -65,7 +65,7 @@ app.post('/signin', async (req, res) => {
         if (user === null) { throw new Error('User already Exist') }
         if (await argon2.verify(user.password, password)) {
             const signedToken = jwt.sign(email, process.env.JWT_SECRET_KEY)
-            res.cookie('jwt', signedToken);
+            res.cookie('jwt', signedToken, {sameSite:'none',secure:'true'});
             res.send({message:"success",token:signedToken});
         } else {
             throw new Error('Password does not match');
@@ -144,7 +144,7 @@ app.patch('/',secure, async (req, res) => {
         if (!field) { throw new Error("field missing from body") }
         if (!update) { throw new Error("update value missing from body") }
         const options = {}
-        options[field] =update
+        options[field] = update
         const updatedLand = await Land.findByIdAndUpdate(id, options, { new: true });
         const load = JSON.stringify(updatedLand)
         console.log(load);
@@ -170,7 +170,7 @@ app.delete('/',secure, async (req, res) => {
 });
 
 // Listening to the port
-const Port = process.env.Port || 3000
+const Port = process.env.PORT || 3000
 app.listen(Port, () => {
     console.log(`Listening on ${Port}`);
 })
